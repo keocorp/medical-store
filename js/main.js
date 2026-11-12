@@ -13,6 +13,16 @@ function enlaceWhatsApp(mensaje) {
     return `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`;
 }
 
+/* Íconos SVG en línea para los botones del detalle (antes Font Awesome). */
+function iconoBoton(tipo) {
+    const trazos = {
+        pdf: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+        externo: '<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+        whatsapp: '<path d="M20 11.5a8 8 0 0 1-11.9 7L4 20l1.4-4A8 8 0 1 1 20 11.5Z"/><path d="M9 8.5c.2 2.7 3.6 6.1 6.4 6.4l1-1.3-1.8-1-1 .8a5 5 0 0 1-2.5-2.5l.8-1-1-1.8Z"/>'
+    };
+    return `<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${trazos[tipo]}</svg>`;
+}
+
 function buscarProducto(id) {
     return PRODUCTOS.find((p) => p.id === id);
 }
@@ -34,6 +44,12 @@ function iconoCategoria(clave) {
     return `<svg class="category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${trazos[clave] || trazos.all}</svg>`;
 }
 
+
+/* Íconos de categoría en "Nuestras líneas" (inicio), tomados del mismo set. */
+document.querySelectorAll(".line-grid > a").forEach((a) => {
+    const clave = a.hash.slice(1);
+    if (CATEGORIAS[clave]) a.insertAdjacentHTML("afterbegin", `<i class="line-icon">${iconoCategoria(clave)}</i>`);
+});
 document.querySelectorAll(".dropdown-content").forEach((menu) => {
     menu.innerHTML = `<a href="productos.html">${iconoCategoria("all")}<span>Todos los productos</span></a>` + Object.entries(CATEGORIAS)
         .map(([clave, nombre]) => `<a href="productos.html#${clave}">${iconoCategoria(clave)}<span>${nombre}</span></a>`)
@@ -101,7 +117,7 @@ function crearCard(p) {
             ${p.notaImagen ? `<p class="product-image-note">${p.notaImagen}</p>` : ""}<p class="card-marca">${etiqueta}</p>
             <p class="card-category">${iconoCategoria(p.categoria)}<span>${CATEGORIAS[p.categoria]}</span></p>
             <h3>${p.nombre}</h3>
-            <div class="card-actions"><button class="btn" type="button" data-producto="${p.id}">Ver Detalles</button><button class="btn quote-toggle" type="button" data-cotizar="${p.id}" aria-pressed="${seleccionCotizacion.has(p.id)}">${seleccionCotizacion.has(p.id) ? "Quitar de cotización" : "Añadir a cotización"}</button></div>
+            <div class="card-actions"><button class="btn" type="button" data-producto="${p.id}">Ver detalles</button><button class="btn quote-toggle" type="button" data-cotizar="${p.id}" aria-pressed="${seleccionCotizacion.has(p.id)}">${seleccionCotizacion.has(p.id) ? "Quitar de cotización" : "Añadir a cotización"}</button></div>
         </article>
     `;
 }
@@ -139,11 +155,11 @@ function crearModalHTML(p) {
 
         <div class="btn-center">
             <a href="${p.ficha}" target="_blank" rel="noopener" class="btn">
-                <i class="fa-solid ${p.ficha.endsWith(".pdf") ? "fa-file-pdf" : "fa-arrow-up-right-from-square"}" aria-hidden="true"></i> ${p.etiquetaFicha || "Ver ficha técnica (PDF)"}
+                ${iconoBoton(p.ficha.endsWith(".pdf") ? "pdf" : "externo")} ${p.etiquetaFicha || "Ver ficha técnica (PDF)"}
             </a>
-            ${p.catalogo ? `<a href="${p.catalogo}" target="_blank" rel="noopener" class="btn"><i class="fa-solid fa-file-pdf" aria-hidden="true"></i> ${p.etiquetaCatalogo || "Catálogo AX-400/AX-500 (PDF)"}</a>` : ""}
+            ${p.catalogo ? `<a href="${p.catalogo}" target="_blank" rel="noopener" class="btn">${iconoBoton("pdf")} ${p.etiquetaCatalogo || "Catálogo AX-400/AX-500 (PDF)"}</a>` : ""}
             <a href="${enlaceWhatsApp(mensaje)}" target="_blank" rel="noopener" class="btn secondary-dark">
-                <i class="fa-brands fa-whatsapp"></i> Cotizar por WhatsApp
+                ${iconoBoton("whatsapp")} Cotizar por WhatsApp
             </a>
         </div>
         </div><div class="product-detail-photo">${p.enPromocion ? `<p class="promo-stock product-badge badge-promo">En promoción</p>` : p.nuevo ? `<p class="product-badge badge-new">Nuevo</p>` : ""}<button type="button" class="image-zoom" data-ampliar="${p.id}" aria-label="Ampliar foto de ${p.modelo}"><img class="modal-img" src="${p.imagen}" alt="${p.nombre} ${p.marca} ${p.modelo}"><span>Ampliar foto</span></button></div></div>
@@ -170,7 +186,7 @@ if (modal) {
     modal.addEventListener('close', () => { document.body.style.overflow = ''; });
 }
 
-/* Un solo listener para todos los botones "Ver Detalles" (presentes y futuros) */
+/* Un solo listener para todos los botones "Ver detalles" (presentes y futuros) */
 document.addEventListener("click", (e) => {
     const boton = e.target.closest("[data-producto]");
     if (boton) abrirModal(boton.dataset.producto);
@@ -220,14 +236,17 @@ function aplicarFiltro(categoria) {
 }
 
 if (contenedorCatalogo && contenedorFiltros) {
-    buscadorEquipos?.addEventListener("input", () => aplicarFiltro(categoriaActual));
-    document.getElementById("limpiar-busqueda")?.addEventListener("click", () => {
+    const botonBorrar = document.getElementById("limpiar-busqueda");
+    const actualizarBorrar = () => { if (botonBorrar) botonBorrar.hidden = !buscadorEquipos.value; };
+    buscadorEquipos?.addEventListener("input", () => { actualizarBorrar(); aplicarFiltro(categoriaActual); });
+    botonBorrar?.addEventListener("click", () => {
         buscadorEquipos.value = "";
+        actualizarBorrar();
         aplicarFiltro(categoriaActual);
         buscadorEquipos.focus();
     });
     document.getElementById("restablecer-catalogo")?.addEventListener("click", () => {
-        buscadorEquipos.value = "";
+        buscadorEquipos.value = ""; actualizarBorrar();
         aplicarFiltro("all");
         history.replaceState(null, "", location.pathname + location.search);
         buscadorEquipos.focus();
@@ -376,3 +395,88 @@ document.addEventListener('click', e => {
     }
     if (e.target.closest('[data-vaciar]')) { seleccionCotizacion.clear(); actualizarCotizacion(); }
 });
+/* --------------------------------------------------------------------------
+   Botón flotante de WhatsApp: en móvil se oculta al bajar y vuelve al subir,
+   para que no tape botones ni fotos mientras se lee.
+   -------------------------------------------------------------------------- */
+(function () {
+    const flotante = document.querySelector('.whatsapp-float');
+    if (!flotante) return;
+    const movil = window.matchMedia('(max-width: 768px)');
+    let ultimoY = window.scrollY;
+    let pendiente = false;
+    function revisar() {
+        pendiente = false;
+        const y = window.scrollY;
+        const finDePagina = window.innerHeight + y >= document.documentElement.scrollHeight - 8;
+        const bajando = y > ultimoY + 4;
+        const subiendo = y < ultimoY - 4;
+        if (!movil.matches || y < 120 || subiendo) flotante.classList.remove('is-hidden');
+        else if (bajando || finDePagina) flotante.classList.add('is-hidden');
+        if (bajando || subiendo) ultimoY = y;
+    }
+    window.addEventListener('scroll', () => {
+        if (!pendiente) { pendiente = true; requestAnimationFrame(revisar); }
+    }, { passive: true });
+    movil.addEventListener('change', revisar);
+})();
+
+/* --------------------------------------------------------------------------
+   Formulario de contacto: se envía sin salir de la página y muestra un
+   mensaje de confirmación. Sin JavaScript sigue funcionando como antes.
+   -------------------------------------------------------------------------- */
+(function () {
+    const form = document.querySelector('form[action*="formspree.io"]');
+    if (!form || !window.fetch) return;
+    const boton = form.querySelector('[type="submit"]');
+    const estado = document.createElement("p");
+    estado.className = "form-status";
+    estado.setAttribute("role", "status");
+    estado.setAttribute("aria-live", "polite");
+    form.append(estado);
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const textoBoton = boton.textContent;
+        boton.disabled = true;
+        boton.textContent = "Enviando…";
+        estado.textContent = "";
+        estado.className = "form-status";
+        try {
+            const r = await fetch(form.action, { method: "POST", body: new FormData(form), headers: { Accept: "application/json" } });
+            if (!r.ok) throw new Error(String(r.status));
+            const nombre = (form.querySelector("#nombre")?.value || "").trim().split(/\s+/)[0];
+            const gracias = document.createElement("div");
+            gracias.className = "form-thanks";
+            gracias.setAttribute("role", "status");
+            gracias.tabIndex = -1;
+            gracias.innerHTML = `<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><circle cx="24" cy="24" r="22"/><path d="m15 25 6 6 12-13"/></svg><h2></h2><p>Recibimos tu mensaje. Nuestro equipo te responderá a tu correo lo antes posible.</p><button type="button" class="btn">Enviar otro mensaje</button>`;
+            gracias.querySelector("h2").textContent = nombre ? `¡Gracias, ${nombre}!` : "¡Gracias!";
+            gracias.querySelector("button").addEventListener("click", () => {
+                form.reset();
+                gracias.replaceWith(form);
+                form.querySelector("input")?.focus();
+            });
+            form.replaceWith(gracias);
+            gracias.focus();
+        } catch {
+            estado.className = "form-status is-error";
+            estado.textContent = "No pudimos enviar el mensaje. Inténtalo de nuevo o escríbenos a ventas2@medicalhealthcare.com.pe.";
+        } finally {
+            boton.disabled = false;
+            boton.textContent = textoBoton;
+        }
+    });
+})();
+
+/* Línea de pulso del inicio: se dibuja cuando entra en pantalla. */
+document.documentElement.classList.add("js");
+(function () {
+    const linea = document.querySelector(".pulse-line");
+    if (!linea) return;
+    if (!("IntersectionObserver" in window)) { linea.classList.add("is-visible"); return; }
+    const io = new IntersectionObserver((entradas) => {
+        if (entradas.some((e) => e.isIntersecting)) { linea.classList.add("is-visible"); io.disconnect(); }
+    }, { threshold: 0.6 });
+    io.observe(linea);
+})();

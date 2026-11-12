@@ -1,0 +1,55 @@
+# ==========================================================================
+# Medical Healthcare · configuración de Apache (cPanel)
+# IMPORTANTE: si en el servidor ya existe un .htaccess con líneas
+# "BEGIN cPanel-generated" (por ejemplo, la versión de PHP), consérvalas
+# y pega este contenido debajo; no las borres.
+# ==========================================================================
+
+# --- Una sola dirección para Google: https y sin "www" ---------------------
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # http -> https
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://medicalhealthcare.com.pe%{REQUEST_URI} [L,R=301]
+
+    # www -> sin www
+    RewriteCond %{HTTP_HOST} ^www\.medicalhealthcare\.com\.pe$ [NC]
+    RewriteRule ^ https://medicalhealthcare.com.pe%{REQUEST_URI} [L,R=301]
+
+    # /index.html -> /  (evita dos direcciones para la misma página)
+    RewriteCond %{THE_REQUEST} \s/+index\.html[\s?] [NC]
+    RewriteRule ^index\.html$ / [L,R=301]
+</IfModule>
+
+# --- Página de error propia --------------------------------------------------
+ErrorDocument 404 /404.html
+
+# --- Compresión: la web carga más rápido -----------------------------------
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/xml application/javascript application/json image/svg+xml application/manifest+json
+</IfModule>
+
+# --- Caché del navegador ------------------------------------------------------
+# CSS y JS llevan ?v=AAAAMMDDx en los HTML: al cambiar la versión se descargan de nuevo.
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 1 hour"
+    ExpiresByType text/html "access plus 0 seconds"
+    ExpiresByType application/xml "access plus 1 hour"
+    ExpiresByType text/plain "access plus 1 hour"
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/x-icon "access plus 1 month"
+    ExpiresByType application/pdf "access plus 1 week"
+</IfModule>
+
+# --- Seguridad básica --------------------------------------------------------
+Options -Indexes
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

@@ -3413,3 +3413,61 @@ footer .footer-grid p {
   font-weight: 600;
   color: var(--accent);
 }
+
+/* --------------------------------------------------------------------------
+   Política de privacidad y consentimiento del formulario
+   -------------------------------------------------------------------------- */
+#about.legal h2 {
+  color: #1c6ea4;
+  font-size: 1.25rem;
+  margin: 2.4rem 0 0.9rem;
+}
+.legal-fecha {
+  color: #718096;
+  font-size: 0.9rem;
+  margin: -1.2rem 0 2rem;
+}
+.legal-datos,
+.legal-lista {
+  color: #555;
+  line-height: 1.8;
+  margin: 0 0 1.8rem;
+  padding-left: 1.2rem;
+}
+.legal-datos {
+  list-style: none;
+  padding: 1.2rem 1.4rem;
+  background: #f5f9fc;
+  border: 1px solid #e2ecf4;
+  border-radius: 12px;
+}
+.legal-lista li + li {
+  margin-top: 0.4rem;
+}
+.legal a,
+.footer-bottom a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.form-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  margin: -0.3rem 0 1.5rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #4a5568;
+}
+.form-consent input {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: #1c6ea4;
+  cursor: pointer;
+}
+.form-consent a {
+  color: #1c6ea4;
+  text-decoration: underline;
+}

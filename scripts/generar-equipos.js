@@ -186,7 +186,7 @@ fs.mkdirSync(carpeta, { recursive: true });
 for (const f of fs.readdirSync(carpeta)) if (f.endsWith(".html")) fs.unlinkSync(path.join(carpeta, f));
 for (const p of PRODUCTOS) fs.writeFileSync(path.join(RAIZ, urlEquipo(p)), pagina(p));
 
-const paginasFijas = ["/", "/productos.html", "/about.html", "/contacto.html"];
+const paginasFijas = ["/", "/productos.html", "/about.html", "/contacto.html", "/privacidad.html"];
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${[...paginasFijas, ...PRODUCTOS.map(urlEquipo)].map((u) => `  <url><loc>${DOMINIO}${u}</loc><lastmod>${hoy}</lastmod></url>`).join("\n")}

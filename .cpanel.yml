@@ -5,5 +5,5 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/medicalhealth/public_html/
-    - /bin/cp -f index.html about.html productos.html contacto.html 404.html robots.txt sitemap.xml .htaccess $DEPLOYPATH
+    - /bin/cp -f index.html about.html productos.html contacto.html privacidad.html 404.html robots.txt sitemap.xml .htaccess $DEPLOYPATH
     - /bin/cp -Rf css js images assets favicon equipos $DEPLOYPATH

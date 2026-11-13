@@ -51,8 +51,8 @@ document.querySelectorAll(".line-grid > a").forEach((a) => {
     if (CATEGORIAS[clave]) a.insertAdjacentHTML("afterbegin", `<i class="line-icon">${iconoCategoria(clave)}</i>`);
 });
 document.querySelectorAll(".dropdown-content").forEach((menu) => {
-    menu.innerHTML = `<a href="productos.html">${iconoCategoria("all")}<span>Todos los productos</span></a>` + Object.entries(CATEGORIAS)
-        .map(([clave, nombre]) => `<a href="productos.html#${clave}">${iconoCategoria(clave)}<span>${nombre}</span></a>`)
+    menu.innerHTML = `<a href="/productos.html">${iconoCategoria("all")}<span>Todos los productos</span></a>` + Object.entries(CATEGORIAS)
+        .map(([clave, nombre]) => `<a href="/productos.html#${clave}">${iconoCategoria(clave)}<span>${nombre}</span></a>`)
         .join("");
 });
 
@@ -116,7 +116,7 @@ function crearCard(p) {
             <div class="card-photo">${p.enPromocion ? `<p class="promo-stock product-badge badge-promo">En promoción</p>` : p.nuevo ? `<p class="product-badge badge-new">Nuevo</p>` : ""}<button type="button" class="image-zoom" data-ampliar="${p.id}" aria-label="Ampliar foto de ${p.modelo}"><img src="${p.imagen}" alt="${p.nombre} ${p.marca} ${p.modelo}" loading="lazy"><span>Ampliar foto</span></button></div>
             ${p.notaImagen ? `<p class="product-image-note">${p.notaImagen}</p>` : ""}<p class="card-marca">${etiqueta}</p>
             <p class="card-category">${iconoCategoria(p.categoria)}<span>${CATEGORIAS[p.categoria]}</span></p>
-            <h3>${p.nombre}</h3>
+            <h3><a href="${urlEquipo(p)}">${p.nombre}</a></h3>
             <div class="card-actions"><button class="btn" type="button" data-producto="${p.id}">Ver detalles</button><button class="btn quote-toggle" type="button" data-cotizar="${p.id}" aria-pressed="${seleccionCotizacion.has(p.id)}">${seleccionCotizacion.has(p.id) ? "Quitar de cotización" : "Añadir a cotización"}</button></div>
         </article>
     `;
@@ -144,6 +144,7 @@ function crearModalHTML(p) {
         <p class="modal-marca">${MOSTRAR_MARCA ? p.marca + " · " : ""}${CATEGORIAS[p.categoria]}</p>
         <h2 id="product-title">${p.nombre}</h2>
         <p class="modal-modelo">${p.modeloDetalle || "Modelo " + p.modelo}</p>
+        <a class="modal-page-link" href="${urlEquipo(p)}">Ver la página completa del equipo →</a>
 
         ${p.notaImagen ? `<p class="product-image-note">${p.notaImagen}</p>` : ""}<p class="modal-resumen">${p.resumen}</p>
 

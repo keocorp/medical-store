@@ -39,9 +39,9 @@ const PRODUCTOS = [
     "marca": "DL Biotech",
     "modelo": "D2 Mini",
     "categoria": "laboratorio",
-    "imagen": "images/productos/dl-d2mini.webp",
-    "ficha": "assets/pdf/dl-d2mini-ficha.pdf",
-    "catalogo": "assets/pdf/dl-d2mini-catalogo.pdf",
+    "imagen": "/images/productos/dl-d2mini.webp",
+    "ficha": "/assets/pdf/dl-d2mini-ficha.pdf",
+    "catalogo": "/assets/pdf/dl-d2mini-catalogo.pdf",
     "etiquetaFicha": "Ficha técnica D2 Mini (PDF)",
     "etiquetaCatalogo": "Folleto D2 Mini (PDF)",
     "resumen": "Sistema de sobremesa para identificación microbiana y pruebas de susceptibilidad a antimicrobianos (ID/AST). Lee y analiza tarjetas para generar resultados de identificación, concentración mínima inhibitoria (MIC) e interpretación S/I/R.",
@@ -99,9 +99,9 @@ const PRODUCTOS = [
         marca: "COMEN",
         modelo: "AX-500",
         categoria: "anestesia",
-        imagen: "images/productos/comen-ax500.webp",
-        ficha: "assets/pdf/comen-ax500.pdf",
-        catalogo: "assets/pdf/comen-ax400-ax500-catalogo.pdf",
+        imagen: "/images/productos/comen-ax500.webp",
+        ficha: "/assets/pdf/comen-ax500.pdf",
+        catalogo: "/assets/pdf/comen-ax400-ax500-catalogo.pdf",
         etiquetaFicha: "Ficha técnica AX-500 (PDF)",
         resumen: "Equipo para anestesia perioperatoria con pantalla táctil TFT de 10,4 pulgadas y diseño modular. Consulta con nuestro equipo la configuración, accesorios y disponibilidad del AX-500.",
         specs: [
@@ -129,8 +129,8 @@ const PRODUCTOS = [
         marca: "Frimed",
         modelo: "PN45V",
         nombre: "Refrigerador para laboratorio y farmacia de 450 litros",
-        imagen: "images/productos/pn45v.webp",
-        ficha: "assets/pdf/frimed-pn45v.pdf",
+        imagen: "/images/productos/pn45v.webp",
+        ficha: "/assets/pdf/frimed-pn45v.pdf",
         resumen: "Refrigerador de alta capacidad con puerta de vidrio y control digital de temperatura, ideal para laboratorios y farmacias que requieren una conservación uniforme y estable.",
         specs: [
             ["Capacidad", "450 litros"],
@@ -157,8 +157,8 @@ const PRODUCTOS = [
         marca: "Frimed",
         modelo: "FS15V",
         nombre: "Refrigerador para farmacia de 150 litros",
-        imagen: "images/productos/fs15v.webp",
-        ficha: "assets/pdf/frimed-fs15v.pdf",
+        imagen: "/images/productos/fs15v.webp",
+        ficha: "/assets/pdf/frimed-fs15v.pdf",
         resumen: "Refrigerador compacto para farmacia con puerta de vidrio y panel de control full touch, pensado para espacios reducidos sin sacrificar control ni seguridad.",
         specs: [
             ["Capacidad", "150 litros"],
@@ -185,8 +185,8 @@ const PRODUCTOS = [
         marca: "Frimed",
         modelo: "FS20V",
         nombre: "Refrigerador para farmacia de 200 litros",
-        imagen: "images/productos/fs20v.webp",
-        ficha: "assets/pdf/frimed-fs20v.pdf",
+        imagen: "/images/productos/fs20v.webp",
+        ficha: "/assets/pdf/frimed-fs20v.pdf",
         resumen: "Refrigerador de tamaño intermedio para farmacia, con puerta de vidrio, tres estantes y panel de control full touch.",
         specs: [
             ["Capacidad", "200 litros"],
@@ -213,8 +213,8 @@ const PRODUCTOS = [
         marca: "Frimed",
         modelo: "AF140V",
         nombre: "Refrigerador para farmacia de 1,400 litros",
-        imagen: "images/productos/af140v.webp",
-        ficha: "assets/pdf/frimed-af140v.pdf",
+        imagen: "/images/productos/af140v.webp",
+        ficha: "/assets/pdf/frimed-af140v.pdf",
         resumen: "Refrigerador de gran capacidad con dos puertas de vidrio, diseñado para farmacias hospitalarias y almacenes que manejan grandes volúmenes de medicamentos.",
         specs: [
             ["Capacidad", "1,400 litros"],
@@ -242,8 +242,8 @@ const PRODUCTOS = [
         marca: "Frimed",
         modelo: "FP30V/2",
         nombre: "Refrigerador combinado de 150 / 150 litros",
-        imagen: "images/productos/fp30v2.webp",
-        ficha: "assets/pdf/frimed-fp30v2.pdf",
+        imagen: "/images/productos/fp30v2.webp",
+        ficha: "/assets/pdf/frimed-fp30v2.pdf",
         resumen: "Refrigerador de dos compartimentos independientes (superior e inferior), cada uno con su propio compresor, control de temperatura y puerta de vidrio.",
         specs: [
             ["Capacidad", "150 L superior + 150 L inferior"],
@@ -272,8 +272,8 @@ const PRODUCTOS = [
         marca: "Keewell",
         modelo: "QW618",
         nombre: "Calentador de sangre e infusión",
-        imagen: "images/productos/qw618-oficial.jpg",
-        ficha: "assets/pdf/keewell-qw618.pdf",
+        imagen: "/images/productos/qw618-oficial.jpg",
+        ficha: "/assets/pdf/keewell-qw618.pdf",
         resumen: "Calentador seco de sangre e infusiones para aplicaciones clínicas rutinarias y de gran volumen: transfusiones durante o después de una cirugía, emergencias y nutrición enteral/parenteral.",
         specs: [
             ["Temperatura", "37 °C a 42 °C"],
@@ -301,8 +301,8 @@ const PRODUCTOS = [
         marca: "Keewell",
         modelo: "FT70",
         nombre: "Calentador de fluidos",
-        imagen: "images/productos/ft70-oficial.jpg",
-        ficha: "assets/pdf/keewell-ft70.pdf",
+        imagen: "/images/productos/ft70-oficial.jpg",
+        ficha: "/assets/pdf/keewell-ft70.pdf",
         resumen: "Calentador de fluidos económico y compacto para infusión rutinaria a flujo lento o medio, nutrición enteral y parenteral, e infusión en niños y neonatos.",
         specs: [
             ["Temperatura", "39 °C (ajuste de fábrica)"],
@@ -331,8 +331,8 @@ const PRODUCTOS = [
         marca: "Keewell",
         modelo: "FT2800",
         nombre: "Calentador de sangre e infusión de 2 canales",
-        imagen: "images/productos/ft2800-oficial.jpg",
-        ficha: "assets/pdf/keewell-ft2800.pdf",
+        imagen: "/images/productos/ft2800-oficial.jpg",
+        ficha: "/assets/pdf/keewell-ft2800.pdf",
         resumen: "Calentador seco de alto rendimiento con dos canales independientes para fluidos de infusión, sangre y hemoderivados, líquidos de diálisis y soluciones de nutrición o enjuague.",
         specs: [
             ["Canales", "2, independientes o combinables"],
@@ -364,8 +364,8 @@ const PRODUCTOS = [
         modelo: "Serie Poleax",
         modeloDetalle: "Serie Poleax · Modelos SA-230, SA-232 y SA-232V",
         nombre: "Autoclave de sobremesa serie Poleax",
-        imagen: "images/productos/poleax.webp",
-        ficha: "assets/pdf/sturdy-poleax.pdf",
+        imagen: "/images/productos/poleax.webp",
+        ficha: "/assets/pdf/sturdy-poleax.pdf",
         resumen: "Autoclaves compactos de 16 litros, con diseños de microprocesador y mecánico tradicional, que ahorran energía y agua y requieren poco mantenimiento. Sus paneles de control son simples, pensados para tareas básicas de esterilización.",
         specs: [
             ["Modelos", "SA-230 · SA-232 · SA-232V"],
@@ -398,8 +398,8 @@ const PRODUCTOS = [
         marca: "Sturdy",
         modelo: "SA-232X",
         nombre: "Autoclave de sobremesa con microprocesador",
-        imagen: "images/productos/sa232x.webp",
-        ficha: "assets/pdf/sturdy-sa232x.pdf",
+        imagen: "/images/productos/sa232x.webp",
+        ficha: "/assets/pdf/sturdy-sa232x.pdf",
         resumen: "Autoclave de sobremesa de 16 litros con control por microprocesador, panel simple, bloqueo automático de puerta por presión y tanque de agua integrado. Solo se rellena el agua, se elige el programa y se inicia el ciclo.",
         specs: [
             ["Sistema de control", "Microprocesador"],
@@ -436,8 +436,8 @@ const PRODUCTOS = [
         "modelo": "NovaPACS",
         "modeloDetalle": "Software de imagenología médica",
         "nombre": "Sistema PACS para imágenes médicas",
-        "imagen": "images/productos/novapacs.webp",
-        "ficha": "assets/pdf/novarad-novapacs.pdf",
+        "imagen": "/images/productos/novapacs.webp",
+        "ficha": "/assets/pdf/novarad-novapacs.pdf",
         "tituloSpecs": "Funciones de la solución",
         "etiquetaFicha": "Ver folleto (PDF)",
         "resumen": "NovaPACS es una solución de imagenología para visualizar, interpretar y comparar estudios médicos. Ofrece flujos de trabajo personalizables y opciones de almacenamiento adaptables a las necesidades de hospitales y centros de diagnóstico.",
@@ -483,8 +483,8 @@ const PRODUCTOS = [
         "modelo": "Nova RIS",
         "modeloDetalle": "Software de gestión de radiología",
         "nombre": "Sistema de información radiológica RIS",
-        "imagen": "images/productos/novaris.webp",
-        "ficha": "assets/pdf/novarad-novaris.pdf",
+        "imagen": "/images/productos/novaris.webp",
+        "ficha": "/assets/pdf/novarad-novaris.pdf",
         "tituloSpecs": "Funciones de la solución",
         "etiquetaFicha": "Ver folleto (PDF)",
         "resumen": "Nova RIS ayuda a organizar el recorrido del paciente y los flujos de trabajo del departamento de radiología, desde la programación de citas hasta la distribución de resultados. Integra herramientas de coordinación, informes y análisis de gestión.",
@@ -529,3 +529,13 @@ const PRODUCTOS = [
         ]
     }
 ];
+
+/* Dirección de la página propia de cada equipo (la genera scripts/generar-equipos.js).
+   Ejemplo: COMEN AX-500 -> /equipos/comen-ax-500.html */
+function slugEquipo(p) {
+    return `${p.marca} ${p.modelo}`.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+function urlEquipo(p) {
+    return `/equipos/${slugEquipo(p)}.html`;
+}

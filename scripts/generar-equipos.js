@@ -61,17 +61,19 @@ function pagina(p) {
         : p.nuevo ? '<p class="product-badge badge-new">Nuevo</p>' : "";
     const relacionados = PRODUCTOS.filter((o) => o.categoria === p.categoria && o.id !== p.id);
 
+    /* WebPage y no Product: Google exige precio, opiniones o calificación para
+       los datos de tipo Product, y aquí los equipos se cotizan sin precio público. */
     const datos = [
         {
             "@context": "https://schema.org",
-            "@type": "Product",
-            name: `${p.nombre} ${nombreCompleto(p)}`,
-            brand: { "@type": "Brand", name: p.marca },
-            model: p.modelo,
-            category: categoria,
-            image: abs(p.imagen),
-            description: p.resumen,
+            "@type": "WebPage",
+            name: titulo,
+            description: descripcion,
             url,
+            inLanguage: "es-PE",
+            primaryImageOfPage: { "@type": "ImageObject", url: abs(p.imagen) },
+            about: { "@type": "Thing", name: `${p.nombre} ${nombreCompleto(p)}`, description: p.resumen },
+            publisher: { "@type": "Organization", name: "Medical Healthcare", url: DOMINIO + "/" },
         },
         {
             "@context": "https://schema.org",

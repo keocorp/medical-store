@@ -29,7 +29,7 @@ const CATEGORIAS = {
 const MOSTRAR_MARCA = true;
 
 /* IDs de los equipos que se muestran en "Productos Destacados" (inicio). */
-const DESTACADOS = ["ax500", "poleax"];
+const DESTACADOS = ["ax500", "pn45v", "poleax", "d2mini"];
 
 const PRODUCTOS = [
     {
@@ -539,3 +539,22 @@ function slugEquipo(p) {
 function urlEquipo(p) {
     return `/equipos/${slugEquipo(p)}.html`;
 }
+
+/* Dato más útil para comparar equipos desde la tarjeta del catálogo. */
+const DATOS_CLAVE = {
+    d2mini: "50 tarjetas por hora",
+    ax500: "Pantalla táctil de 10,4 pulgadas",
+    pn45v: "450 litros",
+    fs15v: "150 litros",
+    fs20v: "200 litros",
+    af140v: "1,400 litros",
+    fp30v2: "150 L + 150 L",
+    qw618: "Hasta 6000 ml por hora",
+    ft70: "Listo en unos 3 minutos",
+    ft2800: "2 canales independientes",
+    poleax: "Cámara de 16 litros",
+    sa232x: "Cámara de 16 litros",
+    novapacs: "Visualización 3D y 4D",
+    novaris: "Integración HL7",
+};
+PRODUCTOS.forEach((p) => { p.datoClave = p.datoClave || DATOS_CLAVE[p.id] || ""; });

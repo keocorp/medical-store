@@ -48,6 +48,15 @@ function iconoPdf() {
     return '<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>';
 }
 
+/* --- Lo que incluye cada equipo (igual que la franja del inicio) --------- */
+const icono = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${d}</svg>`;
+const COMPROMISOS = [
+    [icono('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3.5 17.3a1.8 1.8 0 0 0 2.5 2.5l5.8-5.8a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.3-.5-.5-2.3Z"/>'), "Instalación incluida en el precio"],
+    [icono('<path d="M3 5h18v11H3z"/><path d="M8 20h8M12 16v4M7 9h6M7 12h4"/>'), "Capacitación a tu personal"],
+    [icono('<path d="M12 3 5 6v5c0 4.4 3 8.2 7 10 4-1.8 7-5.6 7-10V6Z"/><path d="m9 12 2 2 4-4"/>'), "Garantía de 12 meses"],
+    [icono('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'), "Respuesta en menos de 24 h hábiles"],
+];
+
 /* --- Página de un equipo ------------------------------------------------ */
 function pagina(p) {
     const url = DOMINIO + urlEquipo(p);
@@ -133,16 +142,18 @@ ${encabezado}
                     </figure>
 
                     <div class="equipo-info">
-                        <p class="eyebrow">${esc(p.marca.toUpperCase())} · ${esc(categoria.toUpperCase())}</p>
                         <h1>${esc(p.nombre)} <span>${esc(nombreCompleto(p))}</span></h1>
-                        <p class="equipo-modelo">${esc(p.modeloDetalle || "Modelo " + p.modelo)}</p>
+                        ${p.modeloDetalle ? `<p class="equipo-modelo">${esc(p.modeloDetalle)}</p>` : ""}
                         <p class="equipo-resumen">${esc(p.resumen)}</p>
                         <div class="equipo-actions">
                             <a class="btn primary" href="${whatsapp}" target="_blank" rel="noopener">${iconoWhatsApp()} Cotizar por WhatsApp</a>
                             <a class="btn equipo-secondary" href="${esc(p.ficha)}" target="_blank" rel="noopener">${iconoPdf()} ${esc(p.etiquetaFicha || "Ficha técnica (PDF)")}</a>
                             ${p.catalogo ? `<a class="btn equipo-secondary" href="${esc(p.catalogo)}" target="_blank" rel="noopener">${iconoPdf()} ${esc(p.etiquetaCatalogo || "Catálogo (PDF)")}</a>` : ""}
-                            <button class="btn quote-toggle equipo-secondary" type="button" data-cotizar="${p.id}" aria-pressed="false">Añadir a cotización</button>
                         </div>
+                        <button class="quote-toggle quote-toggle--link" type="button" data-cotizar="${p.id}" aria-pressed="false">Añadir a mi lista para cotizar varios equipos</button>
+                        <ul class="equipo-incluye" aria-label="Incluido con el equipo">
+${COMPROMISOS.map(([icono, texto]) => `                            <li>${icono}${texto}</li>`).join("\n")}
+                        </ul>
                         <p class="equipo-note">Confirma con nuestro equipo la configuración, disponibilidad y condiciones de entrega antes de tu pedido.</p>
                     </div>
                 </div>
@@ -157,8 +168,9 @@ ${p.specs.map(([k, v]) => `                            <tr><th scope="row">${esc
                     <section aria-labelledby="features-title">
                         <h2 id="features-title">Características</h2>
                         <ul class="feature-list">
-${p.caracteristicas.map((c) => `                            <li>${esc(c)}</li>`).join("\n")}
+${p.caracteristicas.filter((c) => !/^Confirmar/.test(c)).map((c) => `                            <li>${esc(c)}</li>`).join("\n")}
                         </ul>
+                        ${p.caracteristicas.filter((c) => /^Confirmar/.test(c)).map((c) => `<p class="equipo-aviso">${esc(c)}.</p>`).join("")}
                     </section>
                 </div>
             </div>
@@ -166,13 +178,26 @@ ${p.caracteristicas.map((c) => `                            <li>${esc(c)}</li>`)
 ${relacionados.length ? `
         <section class="equipo-relacionados">
             <div class="container">
-                <div class="section-heading"><div><p class="eyebrow">MÁS EN ${esc(categoria.toUpperCase())}</p><h2>Otros equipos de esta línea.</h2></div><a class="text-link" href="/productos.html#${p.categoria}">Ver toda la línea →</a></div>
+                <div class="section-heading"><h2>Más equipos de ${esc(categoria.toLowerCase())}</h2><a class="text-link" href="/productos.html#${p.categoria}">Ver toda la línea →</a></div>
                 <ul class="related-list">
 ${relacionados.map((o) => `                    <li><a href="${urlEquipo(o)}"><img src="${esc(o.imagen)}" alt="" loading="lazy" width="96" height="96"><span><b>${esc(nombreCompleto(o))}</b>${esc(o.nombre)}</span></a></li>`).join("\n")}
                 </ul>
             </div>
         </section>
-` : ""}    </main>
+` : ""}
+        <section class="equipo-cierre" aria-labelledby="cierre-title">
+            <div class="container equipo-cierre-grid">
+                <div>
+                    <h2 id="cierre-title">¿Te interesa el ${esc(nombreCompleto(p))}?</h2>
+                    <p>Cuéntanos la cantidad y tu ciudad. Te respondemos en menos de 24 horas hábiles con disponibilidad y condiciones.</p>
+                </div>
+                <div class="equipo-cierre-acciones">
+                    <a class="btn primary" href="${whatsapp}" target="_blank" rel="noopener">${iconoWhatsApp()} Cotizar por WhatsApp</a>
+                    <a class="btn equipo-secondary" href="/productos.html">Ver todo el catálogo</a>
+                </div>
+            </div>
+        </section>
+    </main>
 ${pie}
 </body>
 

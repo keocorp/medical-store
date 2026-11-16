@@ -3,7 +3,22 @@
    Requiere cargar antes:  js/productos-data.js (en todas las páginas)
    ========================================================================== */
 
-const seleccionCotizacion = new Set();
+/* Selección para cotización: id del equipo → cantidad. Se guarda en el
+   navegador para que no se pierda al pasar de una página a otra. */
+const CLAVE_COTIZACION = "mh-cotizacion";
+const seleccionCotizacion = new Map();
+try {
+    const guardada = JSON.parse(localStorage.getItem(CLAVE_COTIZACION) || "[]");
+    if (Array.isArray(guardada)) {
+        guardada.forEach(([id, cantidad]) => {
+            if (typeof id === "string") seleccionCotizacion.set(id, Math.min(99, Math.max(1, Number(cantidad) || 1)));
+        });
+    }
+} catch { /* sin almacenamiento disponible: la lista vive solo en esta página */ }
+function guardarCotizacion() {
+    try { localStorage.setItem(CLAVE_COTIZACION, JSON.stringify([...seleccionCotizacion])); } catch { /* ignorar */ }
+}
+const plural = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`;
 const WHATSAPP_NUMERO = "51942736112";
 
 /* --------------------------------------------------------------------------
@@ -62,9 +77,14 @@ document.querySelectorAll('.dropdown').forEach((dropdown) => {
     const menu = dropdown.querySelector('.dropdown-content');
     let closeTimer;
     const hoverPointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+    /* El menú queda en la página y se muestra con una transición (clase is-open)
+       en lugar de aparecer de golpe; visibility lo saca del teclado al cerrarse. */
+    menu.hidden = false;
+    menu.querySelectorAll('a').forEach((a, i) => a.style.setProperty('--i', i));
+    const estaAbierto = () => menu.classList.contains('is-open');
     const positionMenu = () => {
         menu.style.removeProperty('--menu-offset');
-        if (window.innerWidth > 768 && !menu.hidden) {
+        if (window.innerWidth > 768 && estaAbierto()) {
             const bounds = menu.getBoundingClientRect();
             const overflow = Math.max(0, bounds.right - document.documentElement.clientWidth + 16);
             menu.style.setProperty('--menu-offset', `${-overflow}px`);
@@ -74,7 +94,8 @@ document.querySelectorAll('.dropdown').forEach((dropdown) => {
     const setOpen = (open) => {
         clearTimeout(closeTimer);
         button.setAttribute('aria-expanded', String(open));
-        menu.hidden = !open;
+        menu.classList.toggle('is-open', open);
+        dropdown.classList.toggle('is-open', open);
         if (open) positionMenu();
     };
     // El ratón abre el menú; el toque y el teclado conservan el clic.
@@ -90,10 +111,10 @@ document.querySelectorAll('.dropdown').forEach((dropdown) => {
     });
     button.addEventListener('click', (event) => {
         const mouseClick = hoverPointer.matches && event.pointerType === 'mouse';
-        setOpen(mouseClick ? true : menu.hidden);
+        setOpen(mouseClick ? true : !estaAbierto());
     });
     dropdown.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && !menu.hidden) {
+        if (event.key === 'Escape' && estaAbierto()) {
             setOpen(false);
             button.focus();
         }
@@ -109,15 +130,29 @@ document.querySelectorAll('.dropdown').forEach((dropdown) => {
 /* --------------------------------------------------------------------------
    Cards de producto
    -------------------------------------------------------------------------- */
+/* Tarjeta: la foto encabeza, luego qué es el equipo, su marca y el dato para
+   comparar. Toda la tarjeta lleva a la página del equipo; "Ver detalles"
+   abre el resumen rápido y el botón "+" lo suma a la cotización. */
+const ICONO_MAS = '<svg class="qt-mas" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg>';
+const ICONO_OK = '<svg class="qt-ok" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
 function crearCard(p) {
-    const etiqueta = MOSTRAR_MARCA ? `${p.marca} · ${p.modelo}` : p.modelo;
+    const elegido = seleccionCotizacion.has(p.id);
+    const marca = MOSTRAR_MARCA ? `${p.marca} ${p.modelo}` : p.modelo;
+    const insignia = p.enPromocion ? `<p class="product-badge badge-promo">En promoción</p>` : p.nuevo ? `<p class="product-badge badge-new">Nuevo</p>` : "";
     return `
-        <article class="card" data-category="${p.categoria}">
-            <div class="card-photo">${p.enPromocion ? `<p class="promo-stock product-badge badge-promo">En promoción</p>` : p.nuevo ? `<p class="product-badge badge-new">Nuevo</p>` : ""}<button type="button" class="image-zoom" data-ampliar="${p.id}" aria-label="Ampliar foto de ${p.modelo}"><img src="${p.imagen}" alt="${p.nombre} ${p.marca} ${p.modelo}" loading="lazy"><span>Ampliar foto</span></button></div>
-            ${p.notaImagen ? `<p class="product-image-note">${p.notaImagen}</p>` : ""}<p class="card-marca">${etiqueta}</p>
-            <p class="card-category">${iconoCategoria(p.categoria)}<span>${CATEGORIAS[p.categoria]}</span></p>
-            <h3><a href="${urlEquipo(p)}">${p.nombre}</a></h3>
-            <div class="card-actions"><button class="btn" type="button" data-producto="${p.id}">Ver detalles</button><button class="btn quote-toggle" type="button" data-cotizar="${p.id}" aria-pressed="${seleccionCotizacion.has(p.id)}">${seleccionCotizacion.has(p.id) ? "Quitar de cotización" : "Añadir a cotización"}</button></div>
+        <article class="equipo-card" data-category="${p.categoria}">
+            <div class="equipo-card-media">${insignia}<img src="${p.imagen}" alt="${p.nombre} ${p.marca} ${p.modelo}" loading="lazy"></div>
+            <div class="equipo-card-body">
+                <p class="equipo-card-cat">${iconoCategoria(p.categoria)}<span>${CATEGORIAS[p.categoria]}</span></p>
+                <h3><a class="equipo-card-link" href="${urlEquipo(p)}">${p.nombre}</a></h3>
+                <p class="equipo-card-marca">${marca}</p>
+                ${p.datoClave ? `<p class="card-dato">${p.datoClave}</p>` : ""}
+                ${p.notaImagen ? `<p class="equipo-card-nota">${p.notaImagen}</p>` : ""}
+            </div>
+            <div class="equipo-card-acciones">
+                <button class="btn equipo-card-detalles" type="button" data-producto="${p.id}">Ver detalles</button>
+                <button class="quote-toggle quote-toggle--card" type="button" data-cotizar="${p.id}" aria-pressed="${elegido}" aria-label="${elegido ? "Quitar de la cotización" : "Añadir a la cotización"}: ${p.modelo}" title="${elegido ? "Quitar de la cotización" : "Añadir a la cotización"}">${ICONO_MAS}${ICONO_OK}<span>${elegido ? "Añadido" : "Cotizar"}</span></button>
+            </div>
         </article>
     `;
 }
@@ -144,7 +179,7 @@ function crearModalHTML(p) {
         <p class="modal-marca">${MOSTRAR_MARCA ? p.marca + " · " : ""}${CATEGORIAS[p.categoria]}</p>
         <h2 id="product-title">${p.nombre}</h2>
         <p class="modal-modelo">${p.modeloDetalle || "Modelo " + p.modelo}</p>
-        <a class="modal-page-link" href="${urlEquipo(p)}">Ver la página completa del equipo →</a>
+        <a class="btn modal-page-link" href="${urlEquipo(p)}">Ver la página completa del equipo</a>
 
         ${p.notaImagen ? `<p class="product-image-note">${p.notaImagen}</p>` : ""}<p class="modal-resumen">${p.resumen}</p>
 
@@ -155,14 +190,15 @@ function crearModalHTML(p) {
         <ul class="feature-list">${caracteristicas}</ul>
 
         <div class="btn-center">
+            <a href="${enlaceWhatsApp(mensaje)}" target="_blank" rel="noopener" class="btn primary modal-wa">
+                ${iconoBoton("whatsapp")} Cotizar por WhatsApp
+            </a>
             <a href="${p.ficha}" target="_blank" rel="noopener" class="btn">
                 ${iconoBoton(p.ficha.endsWith(".pdf") ? "pdf" : "externo")} ${p.etiquetaFicha || "Ver ficha técnica (PDF)"}
             </a>
             ${p.catalogo ? `<a href="${p.catalogo}" target="_blank" rel="noopener" class="btn">${iconoBoton("pdf")} ${p.etiquetaCatalogo || "Catálogo AX-400/AX-500 (PDF)"}</a>` : ""}
-            <a href="${enlaceWhatsApp(mensaje)}" target="_blank" rel="noopener" class="btn secondary-dark">
-                ${iconoBoton("whatsapp")} Cotizar por WhatsApp
-            </a>
         </div>
+        <button class="quote-toggle quote-toggle--link" type="button" data-cotizar="${p.id}" aria-pressed="${seleccionCotizacion.has(p.id)}">${seleccionCotizacion.has(p.id) ? "En tu lista de cotización · Quitar" : "Añadir a mi lista para cotizar varios equipos"}</button>
         </div><div class="product-detail-photo">${p.enPromocion ? `<p class="promo-stock product-badge badge-promo">En promoción</p>` : p.nuevo ? `<p class="product-badge badge-new">Nuevo</p>` : ""}<button type="button" class="image-zoom" data-ampliar="${p.id}" aria-label="Ampliar foto de ${p.modelo}"><img class="modal-img" src="${p.imagen}" alt="${p.nombre} ${p.marca} ${p.modelo}"><span>Ampliar foto</span></button></div></div>
     `;
 }
@@ -222,18 +258,30 @@ function aplicarFiltro(categoria) {
     categoriaActual = categoria;
     const palabras = normalizarBusqueda(buscadorEquipos?.value || "").split(/\s+/).filter(Boolean);
     const lista = PRODUCTOS.filter((p) => {
-        const texto = normalizarBusqueda([p.nombre, p.marca, p.modelo, CATEGORIAS[p.categoria]].join(" "));
+        const texto = normalizarBusqueda([p.nombre, p.marca, p.modelo, CATEGORIAS[p.categoria], p.datoClave].join(" "));
         return (categoria === "all" || p.categoria === categoria) && palabras.every((palabra) => texto.includes(palabra));
     });
     mostrarProductos(contenedorCatalogo, lista);
     const estado = document.getElementById("resultados-busqueda");
-    if (estado) estado.textContent = `${lista.length} ${lista.length === 1 ? "producto encontrado" : "productos encontrados"}${categoria !== "all" ? " en " + CATEGORIAS[categoria] : ""}`;
+    if (estado) estado.textContent = `${plural(lista.length, "producto encontrado", "productos encontrados")}${categoria !== "all" ? " en " + CATEGORIAS[categoria] : ""}`;
     const vacio = document.getElementById("sin-resultados");
-    if (vacio) vacio.hidden = lista.length !== 0;
+    if (vacio) {
+        vacio.hidden = lista.length !== 0;
+        const pedido = document.getElementById("pedir-equipo");
+        const buscado = (buscadorEquipos?.value || "").trim();
+        if (pedido) {
+            pedido.hidden = !buscado;
+            pedido.href = enlaceWhatsApp(`Hola, busco este equipo y no lo encontré en su catálogo: ${buscado}. ¿Podrían ayudarme a conseguirlo?`);
+        }
+    }
     contenedorFiltros.querySelectorAll(".filtro-btn").forEach((btn) => {
         btn.classList.toggle("active", btn.dataset.filter === categoria);
         btn.setAttribute("aria-pressed", String(btn.dataset.filter === categoria));
     });
+    const activo = contenedorFiltros.querySelector(".filtro-btn.active");
+    if (activo && contenedorFiltros.scrollWidth > contenedorFiltros.clientWidth) {
+        contenedorFiltros.scrollLeft = activo.offsetLeft - contenedorFiltros.offsetLeft - 16;
+    }
 }
 
 if (contenedorCatalogo && contenedorFiltros) {
@@ -324,10 +372,11 @@ if ('IntersectionObserver' in window && !movimientoReducido.matches) {
     const apariciones = new IntersectionObserver((entradas) => {
         entradas.forEach(({isIntersecting, target}) => {
             if (!isIntersecting) return;
+            /* Parte siempre visible: solo un desplazamiento corto, sin desvanecer. */
             if (!movimientoReducido.matches) target.animate([
-                {opacity: .45, transform: 'translateY(12px)'},
-                {opacity: 1, transform: 'translateY(0)'}
-            ], {duration: 420, easing: 'ease-out'});
+                {transform: 'translateY(14px)'},
+                {transform: 'translateY(0)'}
+            ], {duration: 560, easing: 'cubic-bezier(0.16, 1, 0.3, 1)'});
             apariciones.unobserve(target);
         });
     }, {threshold: .08});
@@ -354,27 +403,79 @@ resumenCotizacion.id = 'tu-cotizacion';
 const accesoCotizacion = document.createElement('a');
 accesoCotizacion.className = 'quote-access btn';
 accesoCotizacion.href = '#tu-cotizacion';
-accesoCotizacion.addEventListener('click', e => { e.preventDefault(); resumenCotizacion.scrollIntoView({behavior:'auto'}); resumenCotizacion.querySelector('a').focus({preventScroll:true}); });
+accesoCotizacion.addEventListener('click', e => {
+    e.preventDefault();
+    /* En Contacto la lista ya está dentro del formulario: lleva allí. */
+    const enFormulario = document.getElementById('cotizacion-formulario');
+    if (enFormulario) { enFormulario.scrollIntoView({block:'center'}); return; }
+    resumenCotizacion.scrollIntoView({behavior:'auto'});
+    resumenCotizacion.querySelector('a').focus({preventScroll:true});
+});
 accesoCotizacion.hidden = true;
 document.body.append(accesoCotizacion);
 resumenCotizacion.setAttribute('aria-label', 'Tu cotización');
 resumenCotizacion.hidden = true;
-resumenCotizacion.innerHTML = '<div class="container"><h2>Tu cotización</h2><p role="status" aria-live="polite" class="quote-count"></p><ul></ul><div class="quote-actions"><a class="btn" target="_blank" rel="noopener">Consultar por WhatsApp</a><button type="button" class="btn" data-vaciar>Vaciar selección</button></div><p>Se abrirá WhatsApp con tu lista. Revisa el mensaje antes de enviarlo.</p></div>';
+resumenCotizacion.innerHTML = '<div class="container"><h2>Tu cotización</h2><p role="status" aria-live="polite" class="quote-count"></p><ul></ul><div class="quote-actions"><a class="btn primary" target="_blank" rel="noopener">Consultar por WhatsApp</a><a class="btn quote-form-link" href="/contacto.html#cotizacion-formulario">Enviar por formulario</a><button type="button" class="quote-clear" data-vaciar>Vaciar selección</button></div><p class="quote-hint">Se abrirá WhatsApp con tu lista y las cantidades. Revisa el mensaje antes de enviarlo.</p></div>';
 (document.querySelector('main') || document.body).append(resumenCotizacion);
+const avisoVaciado = document.createElement('div');
+avisoVaciado.className = 'quote-undo';
+avisoVaciado.setAttribute('role', 'status');
+avisoVaciado.hidden = true;
+avisoVaciado.innerHTML = '<span>Vaciaste tu selección.</span><button type="button" data-deshacer>Deshacer</button>';
+document.body.append(avisoVaciado);
+let copiaVaciada = null;
+let temporizadorVaciado;
+
+/* Texto de la lista para WhatsApp y para el formulario de contacto. */
+function textoCotizacion(productos) {
+    return productos.map((p, i) => `${i + 1}. ${p.nombre} — ${p.marca} ${p.modelo} (cantidad: ${seleccionCotizacion.get(p.id)})`).join('\n');
+}
 function actualizarCotizacion() {
-    const productos = [...seleccionCotizacion].map(buscarProducto).filter(Boolean);
-    resumenCotizacion.hidden = productos.length === 0;
+    const productos = [...seleccionCotizacion.keys()].map(buscarProducto).filter(Boolean);
+    const unidades = productos.reduce((total, p) => total + seleccionCotizacion.get(p.id), 0);
+    resumenCotizacion.hidden = productos.length === 0 || !!document.getElementById('cotizacion-formulario');
     accesoCotizacion.hidden = productos.length === 0;
+    document.body.classList.toggle('hay-cotizacion', productos.length > 0);
     accesoCotizacion.textContent = `Ver cotización (${productos.length})`;
-    resumenCotizacion.querySelector('.quote-count').textContent = `${productos.length} equipo(s) seleccionado(s)`;
-    resumenCotizacion.querySelector('ul').innerHTML = productos.map(p => `<li><span>${p.nombre} · ${p.marca} ${p.modelo}</span><button type="button" data-cotizar="${p.id}" aria-label="Quitar ${p.modelo}">Quitar</button></li>`).join('');
-    resumenCotizacion.querySelector('a').href = enlaceWhatsApp('Hola, quisiera una cotización de estos equipos:\n' + productos.map((p,i) => `${i+1}. ${p.nombre} — ${p.marca} ${p.modelo}`).join('\n') + '\nPor favor, indíquenme disponibilidad y condiciones de entrega.');
+    resumenCotizacion.querySelector('.quote-count').textContent = `${plural(productos.length, 'equipo seleccionado', 'equipos seleccionados')} · ${plural(unidades, 'unidad', 'unidades')}`;
+    resumenCotizacion.querySelector('ul').innerHTML = productos.map(p => {
+        const n = seleccionCotizacion.get(p.id);
+        return `<li><span>${p.nombre} · ${p.marca} ${p.modelo}</span><span class="quote-qty" role="group" aria-label="Cantidad de ${p.modelo}"><button type="button" data-cantidad="-1" data-id="${p.id}" aria-label="Quitar una unidad de ${p.modelo}"${n <= 1 ? ' disabled' : ''}>−</button><output aria-live="polite">${n}</output><button type="button" data-cantidad="1" data-id="${p.id}" aria-label="Agregar una unidad de ${p.modelo}"${n >= 99 ? ' disabled' : ''}>+</button></span><button type="button" class="quote-remove" data-cotizar="${p.id}" aria-label="Quitar ${p.modelo} de la cotización">Quitar</button></li>`;
+    }).join('');
+    resumenCotizacion.querySelector('a').href = enlaceWhatsApp('Hola, quisiera una cotización de estos equipos:\n' + textoCotizacion(productos) + '\nPor favor, indíquenme disponibilidad y condiciones de entrega.');
+    resumenCotizacion.querySelector('.quote-form-link').hidden = !!document.getElementById('cotizacion-formulario');
     document.querySelectorAll('.quote-toggle').forEach(b => {
         const elegido = seleccionCotizacion.has(b.dataset.cotizar);
         b.setAttribute('aria-pressed', String(elegido));
-        b.textContent = elegido ? 'Quitar de cotización' : 'Añadir a cotización';
+        if (b.classList.contains('quote-toggle--card')) {
+            const p = buscarProducto(b.dataset.cotizar);
+            const accion = elegido ? 'Quitar de la cotización' : 'Añadir a la cotización';
+            b.setAttribute('aria-label', `${accion}: ${p ? p.modelo : ''}`);
+            b.title = accion;
+            b.querySelector('span').textContent = elegido ? 'Añadido' : 'Cotizar';
+        } else if (b.classList.contains('quote-toggle--link')) {
+            b.textContent = elegido ? 'En tu lista de cotización · Quitar' : 'Añadir a mi lista para cotizar varios equipos';
+        } else {
+            b.textContent = elegido ? 'Quitar de cotización' : 'Añadir a cotización';
+        }
     });
+    /* Formulario de contacto: muestra y envía la lista elegida. */
+    const bloqueFormulario = document.getElementById('cotizacion-formulario');
+    if (bloqueFormulario) {
+        bloqueFormulario.hidden = productos.length === 0;
+        bloqueFormulario.querySelector('ul').innerHTML = productos.map(p => `<li>${p.nombre} · ${p.marca} ${p.modelo} <b>× ${seleccionCotizacion.get(p.id)}</b></li>`).join('');
+        bloqueFormulario.querySelector('input[type="hidden"]').value = textoCotizacion(productos);
+    }
+    guardarCotizacion();
 }
+actualizarCotizacion();
+/* Otra pestaña cambió la lista: mantenerla igual aquí. */
+window.addEventListener('storage', e => {
+    if (e.key !== CLAVE_COTIZACION) return;
+    seleccionCotizacion.clear();
+    try { (JSON.parse(e.newValue || '[]') || []).forEach(([id, n]) => seleccionCotizacion.set(id, n)); } catch { /* ignorar */ }
+    actualizarCotizacion();
+});
 document.addEventListener('click', e => {
     const ampliar = e.target.closest('[data-ampliar]');
     if (ampliar) {
@@ -391,10 +492,30 @@ document.addEventListener('click', e => {
     if (elegir) {
         const id = elegir.dataset.cotizar;
         if (!buscarProducto(id)) return;
-        seleccionCotizacion.has(id) ? seleccionCotizacion.delete(id) : seleccionCotizacion.add(id);
+        seleccionCotizacion.has(id) ? seleccionCotizacion.delete(id) : seleccionCotizacion.set(id, 1);
         actualizarCotizacion();
     }
-    if (e.target.closest('[data-vaciar]')) { seleccionCotizacion.clear(); actualizarCotizacion(); }
+    const cantidad = e.target.closest('[data-cantidad]');
+    if (cantidad && seleccionCotizacion.has(cantidad.dataset.id)) {
+        const id = cantidad.dataset.id;
+        seleccionCotizacion.set(id, Math.min(99, Math.max(1, seleccionCotizacion.get(id) + Number(cantidad.dataset.cantidad))));
+        actualizarCotizacion();
+        resumenCotizacion.querySelector(`[data-cantidad="${cantidad.dataset.cantidad}"][data-id="${id}"]:not([disabled])`)?.focus();
+    }
+    if (e.target.closest('[data-vaciar]')) {
+        copiaVaciada = [...seleccionCotizacion];
+        seleccionCotizacion.clear();
+        actualizarCotizacion();
+        avisoVaciado.hidden = false;
+        clearTimeout(temporizadorVaciado);
+        temporizadorVaciado = setTimeout(() => { avisoVaciado.hidden = true; copiaVaciada = null; }, 7000);
+    }
+    if (e.target.closest('[data-deshacer]') && copiaVaciada) {
+        copiaVaciada.forEach(([id, n]) => seleccionCotizacion.set(id, n));
+        copiaVaciada = null;
+        avisoVaciado.hidden = true;
+        actualizarCotizacion();
+    }
 });
 /* --------------------------------------------------------------------------
    Botón flotante de WhatsApp: en móvil se oculta al bajar y vuelve al subir,
@@ -451,7 +572,7 @@ document.addEventListener('click', e => {
             gracias.className = "form-thanks";
             gracias.setAttribute("role", "status");
             gracias.tabIndex = -1;
-            gracias.innerHTML = `<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><circle cx="24" cy="24" r="22"/><path d="m15 25 6 6 12-13"/></svg><h2></h2><p>Recibimos tu mensaje. Nuestro equipo te responderá a tu correo lo antes posible.</p><button type="button" class="btn">Enviar otro mensaje</button>`;
+            gracias.innerHTML = `<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><circle cx="24" cy="24" r="22"/><path d="m15 25 6 6 12-13"/></svg><h2></h2><p>Recibimos tu mensaje. Nuestro equipo te responderá a tu correo en menos de 24 horas hábiles.</p><button type="button" class="btn">Enviar otro mensaje</button>`;
             gracias.querySelector("h2").textContent = nombre ? `¡Gracias, ${nombre}!` : "¡Gracias!";
             gracias.querySelector("button").addEventListener("click", () => {
                 form.reset();

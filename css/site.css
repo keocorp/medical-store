@@ -4646,3 +4646,11 @@ header .dropbtn[aria-expanded="true"] span {
   border-color: var(--accent);
   background: var(--accent-soft);
 }
+/* El menú cerrado sigue en la página (para animarlo): se ancla al borde
+   derecho del botón para que nunca sobresalga y cree scroll horizontal. */
+@media (min-width: 769px) {
+  header .dropdown-content {
+    left: auto;
+    right: 0;
+  }
+}

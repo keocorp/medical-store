@@ -558,3 +558,15 @@ const DATOS_CLAVE = {
     novaris: "Integración HL7",
 };
 PRODUCTOS.forEach((p) => { p.datoClave = p.datoClave || DATOS_CLAVE[p.id] || ""; });
+
+/* Líneas con página propia (generadas por scripts/generar-equipos.js).
+   Las que no figuran aquí siguen abriendo el catálogo con su filtro. */
+const PAGINAS_LINEA = {
+    refrigeracion: "/lineas/refrigeradores-para-farmacia-y-laboratorio.html",
+    calentadores: "/lineas/calentadores-de-sangre-e-infusion.html",
+    esterilizadores: "/lineas/autoclaves-de-sobremesa.html",
+    "tecnologia-informacion": "/lineas/software-pacs-y-ris.html"
+};
+function urlLinea(clave) {
+    return PAGINAS_LINEA[clave] || `/productos.html#${clave}`;
+}

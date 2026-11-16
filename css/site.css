@@ -4654,3 +4654,164 @@ header .dropbtn[aria-expanded="true"] span {
     right: 0;
   }
 }
+
+/* ==========================================================================
+   Formulario con datos de calificación (institución, teléfono, ciudad, plazo)
+   ========================================================================== */
+.contact-form .form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 16px;
+}
+.contact-form .form-group { margin-bottom: 1.1rem; }
+.form-opcional { font-weight: 400; color: var(--muted); font-size: 0.875em; }
+.form-group select {
+  width: 100%;
+  min-width: 0;
+  padding: 0.9rem 2.4rem 0.9rem 1.2rem;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--ink, #12232e);
+  background: var(--paper, #fff) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%2306729a' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 1rem center;
+  border: 1px solid var(--line, #e2e8f0);
+  border-radius: 5px;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+.form-group select:focus {
+  outline: 0;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(6, 114, 154, 0.14);
+}
+@media (max-width: 600px) {
+  .contact-form .form-row { grid-template-columns: 1fr; }
+  .form-group select { font-size: 16px; }
+}
+
+/* ==========================================================================
+   Páginas por línea (/lineas/...): intro → modelos → comparación → cómo
+   elegir → preguntas → cierre. Generadas por scripts/generar-equipos.js.
+   ========================================================================== */
+.linea-intro {
+  padding: 32px 0 40px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+}
+.linea-intro h1 {
+  font-size: clamp(1.9rem, 3.6vw, 2.8rem);
+  line-height: 1.12;
+  margin: 0 0 18px;
+  max-width: 22ch;
+}
+.linea-intro h1 span { color: var(--accent); }
+.linea-intro p {
+  max-width: 68ch;
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+.linea-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+.linea-seccion { padding: 56px 0; }
+.linea-seccion + .linea-seccion { padding-top: 0; }
+.linea-seccion h2 {
+  font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+  margin: 0 0 24px;
+}
+.linea-seccion.faq-section { padding-top: 56px; }
+#modelos-title { scroll-margin-top: 150px; }
+.linea-acciones .equipo-secondary {
+  background: #fff;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+.linea-acciones .equipo-secondary:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.linea-tabla-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+.linea-tabla-scroll:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.linea-tabla {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.linea-tabla th,
+.linea-tabla td {
+  padding: 12px 14px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+.linea-tabla thead th {
+  background: var(--accent-soft);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+.linea-tabla tbody tr:last-child > * { border-bottom: 0; }
+.linea-tabla tbody th { white-space: nowrap; font-weight: 600; }
+.linea-tabla tbody th a { color: var(--accent); text-decoration: none; }
+.linea-tabla tbody th a:hover { text-decoration: underline; }
+.linea-nota {
+  margin: 12px 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.linea-criterios {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px 48px;
+  margin: 0;
+}
+.linea-criterios div {
+  padding-left: 16px;
+  border-left: 3px solid var(--accent);
+}
+.linea-criterios dt {
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.linea-criterios dd {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.linea-incluye {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 40px;
+  padding-top: 24px;
+}
+.linea-page .faq-list { max-width: 820px; }
+
+@media (max-width: 860px) {
+  .linea-incluye { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .linea-intro { padding: 20px 0 32px; }
+  .linea-seccion { padding: 40px 0; }
+  .linea-seccion.faq-section { padding-top: 40px; }
+  .linea-criterios { grid-template-columns: 1fr; gap: 20px; }
+  .linea-acciones .btn { width: 100%; justify-content: center; }
+}
+/* Las parejas de campos solo van lado a lado si el formulario tiene ancho. */
+.contact-form { container-type: inline-size; }
+.contact-form .form-row { align-items: end; }
+@container (max-width: 500px) {
+  .contact-form .form-row { grid-template-columns: 1fr; }
+}

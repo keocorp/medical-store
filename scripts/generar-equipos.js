@@ -21,13 +21,16 @@ const ctx = {};
 vm.createContext(ctx);
 vm.runInContext(
     fs.readFileSync(path.join(RAIZ, "js/productos-data.js"), "utf8") +
-        ";this.PRODUCTOS=PRODUCTOS;this.CATEGORIAS=CATEGORIAS;this.MOSTRAR_MARCA=MOSTRAR_MARCA;this.urlEquipo=urlEquipo;",
+        ";this.PRODUCTOS=PRODUCTOS;this.CATEGORIAS=CATEGORIAS;this.MOSTRAR_MARCA=MOSTRAR_MARCA;this.urlEquipo=urlEquipo;this.PAGINAS_LINEA=PAGINAS_LINEA;this.urlLinea=urlLinea;",
     ctx
 );
-const { PRODUCTOS, CATEGORIAS, urlEquipo } = ctx;
+const { PRODUCTOS, CATEGORIAS, urlEquipo, PAGINAS_LINEA, urlLinea } = ctx;
+const LINEAS = require("./lineas-contenido.js");
 
 /* --- Utilidades --------------------------------------------------------- */
 const esc = (t) => String(t ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+/* Valores de especificaciones: escapa todo salvo los saltos <br> de los datos. */
+const escValor = (t) => esc(t).replace(/&lt;br&gt;/g, "<br>");
 const recortar = (t, n) => (t.length <= n ? t : t.slice(0, t.lastIndexOf(" ", n - 1)).replace(/[,;:.]$/, "") + "…");
 const abs = (u) => (/^https?:/.test(u) ? u : DOMINIO + u);
 const nombreCompleto = (p) => `${p.marca} ${p.modelo}`;
@@ -90,7 +93,7 @@ function pagina(p) {
             itemListElement: [
                 { "@type": "ListItem", position: 1, name: "Inicio", item: DOMINIO + "/" },
                 { "@type": "ListItem", position: 2, name: "Productos", item: DOMINIO + "/productos.html" },
-                { "@type": "ListItem", position: 3, name: categoria, item: `${DOMINIO}/productos.html#${p.categoria}` },
+                { "@type": "ListItem", position: 3, name: categoria, item: DOMINIO + urlLinea(p.categoria) },
                 { "@type": "ListItem", position: 4, name: nombreCompleto(p), item: url },
             ],
         },
@@ -130,7 +133,7 @@ ${encabezado}
                     <ol>
                         <li><a href="/">Inicio</a></li>
                         <li><a href="/productos.html">Productos</a></li>
-                        <li><a href="/productos.html#${p.categoria}">${esc(categoria)}</a></li>
+                        <li><a href="${urlLinea(p.categoria)}">${esc(categoria)}</a></li>
                         <li aria-current="page">${esc(nombreCompleto(p))}</li>
                     </ol>
                 </nav>
@@ -162,7 +165,7 @@ ${COMPROMISOS.map(([icono, texto]) => `                            <li>${icono}$
                     <section aria-labelledby="specs-title">
                         <h2 id="specs-title">${esc(p.tituloSpecs || "Especificaciones técnicas")}</h2>
                         <table class="spec-table"><tbody>
-${p.specs.map(([k, v]) => `                            <tr><th scope="row">${esc(k)}</th><td>${esc(v)}</td></tr>`).join("\n")}
+${p.specs.map(([k, v]) => `                            <tr><th scope="row">${esc(k)}</th><td>${escValor(v)}</td></tr>`).join("\n")}
                         </tbody></table>
                     </section>
                     <section aria-labelledby="features-title">
@@ -178,7 +181,7 @@ ${p.caracteristicas.filter((c) => !/^Confirmar/.test(c)).map((c) => `           
 ${relacionados.length ? `
         <section class="equipo-relacionados">
             <div class="container">
-                <div class="section-heading"><h2>Más equipos de ${esc(categoria.toLowerCase())}</h2><a class="text-link" href="/productos.html#${p.categoria}">Ver toda la línea →</a></div>
+                <div class="section-heading"><h2>Más equipos de ${esc(categoria.toLowerCase())}</h2><a class="text-link" href="${urlLinea(p.categoria)}">${PAGINAS_LINEA[p.categoria] ? "Cómo elegir y comparar →" : "Ver toda la línea →"}</a></div>
                 <ul class="related-list">
 ${relacionados.map((o) => `                    <li><a href="${urlEquipo(o)}"><img src="${esc(o.imagen)}" alt="" loading="lazy" width="96" height="96"><span><b>${esc(nombreCompleto(o))}</b>${esc(o.nombre)}</span></a></li>`).join("\n")}
                 </ul>
@@ -205,17 +208,202 @@ ${pie}
 `;
 }
 
+/* --- Página de una línea (categoría) ------------------------------------ */
+const MOSTRAR_MARCA_GEN = ctx.MOSTRAR_MARCA;
+const ICONO_MAS_GEN = '<svg class="qt-mas" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg>';
+const ICONO_OK_GEN = '<svg class="qt-ok" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+function valorSpec(p, clave) {
+    for (const k of clave.split("|")) {
+        const fila = p.specs.find(([n]) => n === k);
+        if (fila) return fila[1];
+    }
+    return "—";
+}
+
+function paginaLinea(clave) {
+    const t = LINEAS[clave];
+    const url = DOMINIO + PAGINAS_LINEA[clave];
+    const categoria = CATEGORIAS[clave];
+    const modelos = PRODUCTOS.filter((p) => p.categoria === clave);
+    const titulo = `${t.titulo} | Medical Healthcare`;
+    const mensaje = `Hola, quisiera asesoría y una cotización de ${t.h1.toLowerCase()}. ¿Podrían ayudarme a elegir el modelo adecuado?`;
+    const whatsapp = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
+    const marca = MOSTRAR_MARCA_GEN;
+
+    const datos = [
+        {
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            name: titulo,
+            description: t.descripcion,
+            url,
+            inLanguage: "es-PE",
+            publisher: { "@type": "Organization", name: "Medical Healthcare", url: DOMINIO + "/" },
+            mainEntity: {
+                "@type": "ItemList",
+                itemListElement: modelos.map((p, i) => ({ "@type": "ListItem", position: i + 1, name: nombreCompleto(p), url: DOMINIO + urlEquipo(p) })),
+            },
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Inicio", item: DOMINIO + "/" },
+                { "@type": "ListItem", position: 2, name: "Productos", item: DOMINIO + "/productos.html" },
+                { "@type": "ListItem", position: 3, name: categoria, item: url },
+            ],
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: t.faq.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
+        },
+    ];
+
+    const tarjetas = modelos.map((p) => `
+                    <article class="equipo-card">
+                        <div class="equipo-card-media">${p.nuevo ? '<p class="product-badge badge-new">Nuevo</p>' : ""}<img src="${esc(p.imagen)}" alt="${esc(`${p.nombre} ${nombreCompleto(p)}`)}" loading="lazy"></div>
+                        <div class="equipo-card-body">
+                            <h3><a class="equipo-card-link" href="${urlEquipo(p)}">${esc(p.nombre)}</a></h3>
+                            <p class="equipo-card-marca">${esc(marca ? nombreCompleto(p) : p.modelo)}</p>
+                            ${p.datoClave ? `<p class="card-dato">${esc(p.datoClave)}</p>` : ""}
+                        </div>
+                        <div class="equipo-card-acciones">
+                            <a class="btn equipo-card-detalles" href="${urlEquipo(p)}">Ver ficha</a>
+                            <button class="quote-toggle quote-toggle--card" type="button" data-cotizar="${p.id}" aria-pressed="false" aria-label="Añadir a la cotización: ${esc(p.modelo)}" title="Añadir a la cotización">${ICONO_MAS_GEN}${ICONO_OK_GEN}<span>Cotizar</span></button>
+                        </div>
+                    </article>`).join("");
+
+    const tabla = t.comparar ? `
+        <section class="linea-seccion" aria-labelledby="comparar-title">
+            <div class="container">
+                <h2 id="comparar-title">Comparación de modelos</h2>
+                <div class="linea-tabla-scroll" tabindex="0" role="region" aria-labelledby="comparar-title">
+                    <table class="linea-tabla">
+                        <thead><tr><th scope="col">Modelo</th>${t.comparar.map((c) => `<th scope="col">${esc(c.split("|")[0])}</th>`).join("")}</tr></thead>
+                        <tbody>
+${modelos.map((p) => `                            <tr><th scope="row"><a href="${urlEquipo(p)}">${esc(nombreCompleto(p))}</a></th>${t.comparar.map((c) => `<td>${escValor(valorSpec(p, c))}</td>`).join("")}</tr>`).join("\n")}
+                        </tbody>
+                    </table>
+                </div>
+                <p class="linea-nota">Datos de las fichas técnicas del fabricante. Confirma la configuración y disponibilidad con nuestro equipo.</p>
+            </div>
+        </section>
+` : "";
+
+    return `<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="color-scheme" content="light only">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Página generada por scripts/generar-equipos.js: editar los textos en scripts/lineas-contenido.js -->
+    <meta name="description" content="${esc(t.descripcion)}">
+    <title>${esc(titulo)}</title>
+    <link rel="canonical" href="${url}">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_PE">
+    <meta property="og:site_name" content="Medical Healthcare">
+    <meta property="og:title" content="${esc(titulo)}">
+    <meta property="og:description" content="${esc(t.descripcion)}">
+    <meta property="og:url" content="${url}">
+    <meta property="og:image" content="${abs(modelos[0].imagen)}">
+    <meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">${JSON.stringify(datos)}</script>
+
+    ${cabecera.trim()}
+</head>
+
+<body class="linea-page">
+${encabezado}
+    <main>
+        <section class="linea-intro">
+            <div class="container">
+                <nav class="breadcrumb" aria-label="Ruta de navegación">
+                    <ol>
+                        <li><a href="/">Inicio</a></li>
+                        <li><a href="/productos.html">Productos</a></li>
+                        <li aria-current="page">${esc(categoria)}</li>
+                    </ol>
+                </nav>
+                <h1>${esc(t.h1)} <span>en Perú</span></h1>
+${t.intro.map((p) => `                <p>${esc(p)}</p>`).join("\n")}
+                <div class="linea-acciones">
+                    <a class="btn primary" href="${whatsapp}" target="_blank" rel="noopener">${iconoWhatsApp()} Pedir asesoría por WhatsApp</a>
+                    <a class="btn equipo-secondary" href="#modelos-title">Ver los ${modelos.length} modelos</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="linea-seccion" aria-labelledby="modelos-title">
+            <div class="container">
+                <h2 id="modelos-title">Modelos disponibles</h2>
+                <div class="products linea-grid">${tarjetas}
+                </div>
+            </div>
+        </section>
+${tabla}
+        <section class="linea-seccion linea-elegir" aria-labelledby="elegir-title">
+            <div class="container">
+                <h2 id="elegir-title">Cómo elegir</h2>
+                <dl class="linea-criterios">
+${t.criterios.map(([k, v]) => `                    <div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("\n")}
+                </dl>
+${t.compromisos ? `                <ul class="equipo-incluye linea-incluye" aria-label="Incluido con cada equipo">
+${COMPROMISOS.map(([icono, texto]) => `                    <li>${icono}${texto}</li>`).join("\n")}
+                </ul>` : ""}
+            </div>
+        </section>
+
+        <section class="linea-seccion faq-section" aria-labelledby="faq-title">
+            <div class="container">
+                <h2 id="faq-title">Preguntas frecuentes</h2>
+                <div class="faq-list">
+${t.faq.map(([q, a]) => `                    <details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join("\n")}
+                </div>
+            </div>
+        </section>
+
+        <section class="equipo-cierre" aria-labelledby="cierre-title">
+            <div class="container equipo-cierre-grid">
+                <div>
+                    <h2 id="cierre-title">¿No sabes cuál elegir?</h2>
+                    <p>Cuéntanos qué necesitas, la cantidad y tu ciudad. Te respondemos en menos de 24 horas hábiles con una recomendación y condiciones.</p>
+                </div>
+                <div class="equipo-cierre-acciones">
+                    <a class="btn primary" href="${whatsapp}" target="_blank" rel="noopener">${iconoWhatsApp()} Pedir asesoría por WhatsApp</a>
+                    <a class="btn equipo-secondary" href="/productos.html">Ver todo el catálogo</a>
+                </div>
+            </div>
+        </section>
+    </main>
+${pie}
+</body>
+
+</html>
+`;
+}
+
 /* --- Escribir páginas y sitemap ------------------------------------------ */
 const carpeta = path.join(RAIZ, "equipos");
 fs.mkdirSync(carpeta, { recursive: true });
 for (const f of fs.readdirSync(carpeta)) if (f.endsWith(".html")) fs.unlinkSync(path.join(carpeta, f));
 for (const p of PRODUCTOS) fs.writeFileSync(path.join(RAIZ, urlEquipo(p)), pagina(p));
 
+const carpetaLineas = path.join(RAIZ, "lineas");
+fs.mkdirSync(carpetaLineas, { recursive: true });
+for (const f of fs.readdirSync(carpetaLineas)) if (f.endsWith(".html")) fs.unlinkSync(path.join(carpetaLineas, f));
+for (const clave of Object.keys(PAGINAS_LINEA)) {
+    if (!LINEAS[clave]) throw new Error(`Falta el texto de la línea "${clave}" en scripts/lineas-contenido.js`);
+    fs.writeFileSync(path.join(RAIZ, PAGINAS_LINEA[clave]), paginaLinea(clave));
+}
+
 const paginasFijas = ["/", "/productos.html", "/about.html", "/contacto.html", "/privacidad.html"];
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[...paginasFijas, ...PRODUCTOS.map(urlEquipo)].map((u) => `  <url><loc>${DOMINIO}${u}</loc><lastmod>${hoy}</lastmod></url>`).join("\n")}
+${[...paginasFijas, ...Object.values(PAGINAS_LINEA), ...PRODUCTOS.map(urlEquipo)].map((u) => `  <url><loc>${DOMINIO}${u}</loc><lastmod>${hoy}</lastmod></url>`).join("\n")}
 </urlset>
 `;
 fs.writeFileSync(path.join(RAIZ, "sitemap.xml"), sitemap);
-console.log(`${PRODUCTOS.length} páginas en /equipos y sitemap.xml actualizado.`);
+console.log(`${PRODUCTOS.length} páginas en /equipos, ${Object.keys(PAGINAS_LINEA).length} en /lineas y sitemap.xml actualizado.`);

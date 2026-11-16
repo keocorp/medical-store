@@ -67,7 +67,7 @@ document.querySelectorAll(".line-grid > a").forEach((a) => {
 });
 document.querySelectorAll(".dropdown-content").forEach((menu) => {
     menu.innerHTML = `<a href="/productos.html">${iconoCategoria("all")}<span>Todos los productos</span></a>` + Object.entries(CATEGORIAS)
-        .map(([clave, nombre]) => `<a href="/productos.html#${clave}">${iconoCategoria(clave)}<span>${nombre}</span></a>`)
+        .map(([clave, nombre]) => `<a href="${urlLinea(clave)}">${iconoCategoria(clave)}<span>${nombre}</span></a>`)
         .join("");
 });
 
@@ -567,6 +567,7 @@ document.addEventListener('click', e => {
         try {
             const r = await fetch(form.action, { method: "POST", body: new FormData(form), headers: { Accept: "application/json" } });
             if (!r.ok) throw new Error(String(r.status));
+            medirEvento("formulario_enviado", { equipos: form.querySelector('[name="equipos_cotizacion"]')?.value ? "si" : "no", plazo: form.querySelector("#plazo")?.value || "" });
             const nombre = (form.querySelector("#nombre")?.value || "").trim().split(/\s+/)[0];
             const gracias = document.createElement("div");
             gracias.className = "form-thanks";
@@ -602,3 +603,33 @@ document.documentElement.classList.add("js");
     }, { threshold: 0.6 });
     io.observe(linea);
 })();
+
+/* --------------------------------------------------------------------------
+   Medición (Google Analytics 4). Inactiva mientras GA4_ID esté vacío.
+   Para activarla: poner el ID de medición (G-XXXXXXXXXX) y actualizar la
+   política de privacidad (sección de cookies y analítica).
+   Eventos: clic_whatsapp, clic_telefono, clic_correo, formulario_enviado.
+   -------------------------------------------------------------------------- */
+const GA4_ID = "";
+(function () {
+    if (!GA4_ID) return;
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { window.dataLayer.push(arguments); };
+    window.gtag("js", new Date());
+    window.gtag("config", GA4_ID);
+    const s = document.createElement("script");
+    s.async = true;
+    s.src = `https://www.googletagmanager.com/gtag/js?id=${GA4_ID}`;
+    document.head.append(s);
+
+    document.addEventListener("click", (e) => {
+        const a = e.target.closest("a[href]");
+        if (!a) return;
+        const href = a.getAttribute("href");
+        const evento = /wa\.me|whatsapp/.test(href) ? "clic_whatsapp" : href.startsWith("tel:") ? "clic_telefono" : href.startsWith("mailto:") ? "clic_correo" : null;
+        if (evento) window.gtag("event", evento, { ubicacion: location.pathname, texto: a.textContent.trim().slice(0, 60) });
+    });
+})();
+function medirEvento(nombre, datos) {
+    if (GA4_ID && window.gtag) window.gtag("event", nombre, datos || {});
+}

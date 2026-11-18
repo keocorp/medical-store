@@ -7,3 +7,5 @@ deployment:
     - export DEPLOYPATH=/home/medicalhealth/public_html/
     - /bin/cp -f index.html about.html productos.html contacto.html privacidad.html 404.html robots.txt sitemap.xml .htaccess $DEPLOYPATH
     - /bin/cp -Rf css js images assets favicon equipos lineas $DEPLOYPATH
+    - /bin/mkdir -p $DEPLOYPATH.well-known
+    - /bin/cp -f .well-known/security.txt $DEPLOYPATH.well-known/

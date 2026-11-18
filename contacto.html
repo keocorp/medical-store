@@ -72,29 +72,29 @@
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="nombre">Nombre</label>
-                                    <input type="text" id="nombre" name="nombre" autocomplete="name" placeholder="Tu nombre completo" required>
+                                    <input type="text" id="nombre" name="nombre" maxlength="100" autocomplete="name" placeholder="Tu nombre completo" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="institucion">Institución <span class="form-opcional">(opcional)</span></label>
-                                    <input type="text" id="institucion" name="institucion" autocomplete="organization" placeholder="Clínica, laboratorio u hospital">
+                                    <input type="text" id="institucion" name="institucion" maxlength="150" autocomplete="organization" placeholder="Clínica, laboratorio u hospital">
                                 </div>
                             </div>
 
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="correo">Correo electrónico</label>
-                                    <input type="email" id="correo" name="correo" autocomplete="email" placeholder="tu@correo.com" required>
+                                    <input type="email" id="correo" name="correo" maxlength="120" autocomplete="email" placeholder="tu@correo.com" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="telefono">Teléfono o WhatsApp</label>
-                                    <input type="tel" id="telefono" name="telefono" autocomplete="tel" inputmode="tel" placeholder="+51 9XX XXX XXX" required>
+                                    <input type="tel" id="telefono" name="telefono" maxlength="30" autocomplete="tel" inputmode="tel" placeholder="+51 9XX XXX XXX" required>
                                 </div>
                             </div>
 
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="ciudad">Ciudad <span class="form-opcional">(opcional)</span></label>
-                                    <input type="text" id="ciudad" name="ciudad" autocomplete="address-level2" placeholder="Lima, Arequipa…">
+                                    <input type="text" id="ciudad" name="ciudad" maxlength="80" autocomplete="address-level2" placeholder="Lima, Arequipa…">
                                 </div>
                                 <div class="form-group">
                                     <label for="plazo">¿Para cuándo lo necesitas?</label>
@@ -110,7 +110,7 @@
 
                             <div class="form-group">
                                 <label for="mensaje">Mensaje</label>
-                                <textarea id="mensaje" name="mensaje" rows="4" placeholder="Equipo que necesitas, cantidad o tu consulta" required></textarea>
+                                <textarea id="mensaje" name="mensaje" rows="4" maxlength="3000" placeholder="Equipo que necesitas, cantidad o tu consulta" required></textarea>
                             </div>
 
                             <div class="form-cotizacion" id="cotizacion-formulario" hidden>
@@ -123,6 +123,9 @@
                                 <input type="checkbox" id="acepta-privacidad" name="acepta_privacidad" value="Sí, acepta la política de privacidad" required>
                                 <label for="acepta-privacidad">He leído y acepto la <a href="privacidad.html" target="_blank" rel="noopener">política de privacidad</a> y autorizo el tratamiento de mis datos para atender mi consulta.</label>
                             </div>
+
+                            <!-- Trampa antispam de Formspree: las personas no la ven; si un bot la llena, el envío se descarta -->
+                            <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none">
 
                             <button type="submit" class="btn primary btn-center">Enviar mensaje</button>
                         </form>

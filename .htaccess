@@ -9,6 +9,10 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # Bloquea los métodos TRACE/TRACK (devuelven lo que se les envía)
+    RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)$ [NC]
+    RewriteRule ^ - [F]
+
     # http -> https
     RewriteCond %{HTTPS} off
     RewriteRule ^ https://medicalhealthcare.com.pe%{REQUEST_URI} [L,R=301]
@@ -52,4 +56,13 @@ Options -Indexes
 <IfModule mod_headers.c>
     Header always set X-Content-Type-Options "nosniff"
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    # Solo https durante un año (sin subdominios: el correo y cPanel no se tocan)
+    Header always set Strict-Transport-Security "max-age=31536000"
+    # Nadie puede mostrar la web dentro de otra página (clickjacking)
+    Header always set X-Frame-Options "SAMEORIGIN"
+    # Bloquea cámara, micrófono, ubicación y pagos: la web no los usa
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+    # Política de contenido: solo se cargan archivos propios, Google Fonts,
+    # Formspree (formulario), el mapa de Google (contacto) y Google Analytics (cuando se active GA4_ID)
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*.google-analytics.com https://*.googletagmanager.com; connect-src 'self' https://formspree.io https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; form-action 'self' https://formspree.io; frame-src https://www.google.com https://maps.google.com; frame-ancestors 'self'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests"
 </IfModule>

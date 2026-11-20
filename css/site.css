@@ -3932,6 +3932,12 @@ a {
 .footer-contacto p {
   margin: 0;
 }
+/* Teléfono y correo: área táctil mínima de 24 px (PageSpeed, objetivos táctiles) */
+.footer-contacto a {
+  display: block;
+  min-height: 24px;
+  padding-block: 3px;
+}
 
 /* --------------------------------------------------------------------------
    Portada: el distribuidor primero, el AX-500 como destacado

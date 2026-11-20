@@ -9,6 +9,27 @@
    ========================================================================== */
 const fs = require("fs");
 const path = require("path");
+
+/* Ancho y alto reales de una imagen (webp, jpg o png), para reservar su espacio. */
+function medidas(src) {
+    const b = fs.readFileSync(path.join(__dirname, "..", src.replace(/^\//, "")));
+    let w = 0, h = 0;
+    if (b.toString("ascii", 0, 4) === "RIFF") {
+        const t = b.toString("ascii", 12, 16);
+        if (t === "VP8X") { w = 1 + b.readUIntLE(24, 3); h = 1 + b.readUIntLE(27, 3); }
+        else if (t === "VP8 ") { w = b.readUInt16LE(26) & 0x3fff; h = b.readUInt16LE(28) & 0x3fff; }
+        else if (t === "VP8L") { const v = b.readUInt32LE(21); w = (v & 0x3fff) + 1; h = ((v >> 14) & 0x3fff) + 1; }
+    } else if (b[0] === 0xff && b[1] === 0xd8) {
+        for (let i = 2; i < b.length;) {
+            const m = b[i + 1];
+            if (m >= 0xc0 && m <= 0xcf && m !== 0xc4 && m !== 0xc8 && m !== 0xcc) { h = b.readUInt16BE(i + 5); w = b.readUInt16BE(i + 7); break; }
+            i += 2 + b.readUInt16BE(i + 2);
+        }
+    } else if (b.toString("ascii", 1, 4) === "PNG") { w = b.readUInt32BE(16); h = b.readUInt32BE(20); }
+    if (!w || !h) throw new Error("No se pudo leer el tamaño de " + src);
+    return `width="${w}" height="${h}"`;
+}
+
 const vm = require("vm");
 
 const RAIZ = path.join(__dirname, "..");
@@ -59,6 +80,16 @@ const COMPROMISOS = [
     [icono('<path d="M12 3 5 6v5c0 4.4 3 8.2 7 10 4-1.8 7-5.6 7-10V6Z"/><path d="m9 12 2 2 4-4"/>'), "Garantía de 12 meses"],
     [icono('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'), "Respuesta en menos de 24 h hábiles"],
 ];
+
+/* Software (PACS/RIS): sin instalación ni garantía fijas; se definen al cotizar,
+   igual que en la página de la línea. */
+const COMPROMISOS_SOFTWARE = [
+    [COMPROMISOS[0][0], "Implementación coordinada contigo"],
+    COMPROMISOS[1],
+    [COMPROMISOS[2][0], "Alcance, soporte y condiciones según cotización"],
+    COMPROMISOS[3],
+];
+const compromisosDe = (p) => (p.categoria === "tecnologia-informacion" ? COMPROMISOS_SOFTWARE : COMPROMISOS);
 
 /* --- Página de un equipo ------------------------------------------------ */
 function pagina(p) {
@@ -140,7 +171,7 @@ ${encabezado}
 
                 <div class="equipo-layout">
                     <figure class="equipo-photo">
-                        ${insignia}<button type="button" class="image-zoom" data-ampliar="${p.id}" aria-label="Ampliar foto de ${esc(p.modelo)}"><img src="${esc(p.imagen)}" alt="${esc(`${p.nombre} ${nombreCompleto(p)}`)}" fetchpriority="high"><span>Ampliar foto</span></button>
+                        ${insignia}<button type="button" class="image-zoom" data-ampliar="${p.id}" aria-label="Ampliar foto de ${esc(p.modelo)}"><img src="${esc(p.imagen)}" alt="${esc(`${p.nombre} ${nombreCompleto(p)}`)}" ${medidas(p.imagen)} fetchpriority="high"><span>Ampliar foto</span></button>
                         ${p.notaImagen ? `<figcaption class="product-image-note">${esc(p.notaImagen)}</figcaption>` : ""}
                     </figure>
 
@@ -154,8 +185,8 @@ ${encabezado}
                             ${p.catalogo ? `<a class="btn equipo-secondary" href="${esc(p.catalogo)}" target="_blank" rel="noopener">${iconoPdf()} ${esc(p.etiquetaCatalogo || "Catálogo (PDF)")}</a>` : ""}
                         </div>
                         <button class="quote-toggle quote-toggle--link" type="button" data-cotizar="${p.id}" aria-pressed="false">Añadir a mi lista para cotizar varios equipos</button>
-                        <ul class="equipo-incluye" aria-label="Incluido con el equipo">
-${COMPROMISOS.map(([icono, texto]) => `                            <li>${icono}${texto}</li>`).join("\n")}
+                        <ul class="equipo-incluye" aria-label="${p.categoria === "tecnologia-informacion" ? "Condiciones del software" : "Incluido con el equipo"}">
+${compromisosDe(p).map(([icono, texto]) => `                            <li>${icono}${texto}</li>`).join("\n")}
                         </ul>
                         <p class="equipo-note">Confirma con nuestro equipo la configuración, disponibilidad y condiciones de entrega antes de tu pedido.</p>
                     </div>
@@ -262,7 +293,7 @@ function paginaLinea(clave) {
 
     const tarjetas = modelos.map((p) => `
                     <article class="equipo-card">
-                        <div class="equipo-card-media">${p.nuevo ? '<p class="product-badge badge-new">Nuevo</p>' : ""}<img src="${esc(p.imagen)}" alt="${esc(`${p.nombre} ${nombreCompleto(p)}`)}" loading="lazy"></div>
+                        <div class="equipo-card-media">${p.nuevo ? '<p class="product-badge badge-new">Nuevo</p>' : ""}<img src="${esc(p.imagen)}" alt="${esc(`${p.nombre} ${nombreCompleto(p)}`)}" ${medidas(p.imagen)} loading="lazy"></div>
                         <div class="equipo-card-body">
                             <h3><a class="equipo-card-link" href="${urlEquipo(p)}">${esc(p.nombre)}</a></h3>
                             <p class="equipo-card-marca">${esc(marca ? nombreCompleto(p) : p.modelo)}</p>

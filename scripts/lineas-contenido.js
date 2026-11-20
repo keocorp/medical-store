@@ -11,9 +11,9 @@ module.exports = {
     refrigeracion: {
         titulo: "Refrigeradores para farmacia y laboratorio en Perú | Frimed",
         h1: "Refrigeradores para farmacia y laboratorio",
-        descripcion: "Refrigeradores Frimed para farmacia y laboratorio de 150 a 1,400 litros, con rango de +2 °C a +12 °C. Compara modelos y cotiza en Lima y todo el Perú.",
+        descripcion: "Refrigeradores Frimed para farmacia y laboratorio de 150 a 1,400 litros, de +2 °C a +12 °C (FP30V/2: hasta +15 °C). Cotiza en Lima y todo el Perú.",
         intro: [
-            "Refrigeradores Frimed para conservar medicamentos, reactivos y otros productos que requieren cadena de frío, con control digital de temperatura entre +2 °C y +12 °C.",
+            "Refrigeradores Frimed para conservar medicamentos, reactivos y otros productos que requieren cadena de frío, con control digital de temperatura entre +2 °C y +12 °C según el modelo (el FP30V/2 llega hasta +15 °C en cada compartimento).",
             "Hay cinco modelos: desde 150 litros para una farmacia pequeña hasta 1,400 litros para farmacias hospitalarias y almacenes. Todos tienen puerta de vidrio, estantes de acero inoxidable regulables y gas refrigerante R290.",
         ],
         comparar: ["Capacidad", "Rango de temperatura", "Estantes", "Dimensiones externas (A×P×H)", "Potencia"],
